@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:Koelkast5!@localhost:5432/trades"
+  url      = env("DATABASE_URL")
  
 }
 model Trade {
