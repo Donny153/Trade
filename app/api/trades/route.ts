@@ -21,17 +21,17 @@ export async function POST(request: Request) {
       .from("trades")
       .insert([
         {
-          contractName: data.contractName,
-          enteredAt: new Date(data.enteredAt).toISOString(),
-          exitedAt: new Date(data.exitedAt).toISOString(),
-          entryPrice: Number.parseFloat(data.entryPrice),
-          exitPrice: Number.parseFloat(data.exitPrice),
-          fees: Number.parseFloat(data.fees),
-          pnl: Number.parseFloat(data.pnl),
-          size: data.size,
-          type: data.type,
-          tradeDay: new Date(data.tradeDay).toISOString(),
-          tradeDuration: data.tradeDuration,
+          contractName: data.ContractName,
+          enteredAt: new Date(data.EnteredAt).toISOString(),
+          exitedAt: new Date(data.ExitedAt).toISOString(),
+          entryPrice: Number.parseFloat(data.EntryPrice),
+          exitPrice: Number.parseFloat(data.ExitPrice),
+          fees: Number.parseFloat(data.Fees),
+          pnl: Number.parseFloat(data.PnL),
+          size: data.Size,
+          type: data.Type,
+          tradeDay: new Date(data.TradeDay).toISOString(),
+          tradeDuration: data.TradeDuration,
         },
       ])
       .select()

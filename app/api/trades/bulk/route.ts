@@ -7,16 +7,16 @@ export async function POST(request: Request) {
 
     const formattedTrades = trades.map((trade: any) => ({
       contractName: trade.contractName,
-      enteredAt: new Date(trade.enteredAt).toISOString(),
-      exitedAt: new Date(trade.exitedAt).toISOString(),
-      entryPrice: Number.parseFloat(trade.entryPrice),
-      exitPrice: Number.parseFloat(trade.exitPrice),
-      fees: Number.parseFloat(trade.fees),
-      pnl: Number.parseFloat(trade.pnl),
-      size: trade.size,
-      type: trade.type,
-      tradeDay: new Date(trade.tradeDay).toISOString(),
-      tradeDuration: trade.tradeDuration,
+      enteredAt: new Date(trade.EnteredAt).toISOString(),
+      exitedAt: new Date(trade.ExitedAt).toISOString(),
+      entryPrice: Number.parseFloat(trade.EntryPrice),
+      exitPrice: Number.parseFloat(trade.ExitPrice),
+      fees: Number.parseFloat(trade.Fees),
+      pnl: Number.parseFloat(trade.PnL),
+      size: trade.Size,
+      type: trade.Type,
+      tradeDay: new Date(trade.TradeDay).toISOString(),
+      tradeDuration: trade.TradeDuration,
     }))
 
     const { data, error } = await supabase.from("trades").insert(formattedTrades)
