@@ -1,60 +1,68 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase"
+import prisma from "@/lib/prisma"
 
 export async function GET() {
   try {
-    const { data, error } = await supabase.from("trades").select("*").order("enteredAt", { ascending: false })
+    const trades = await prisma.trade.findMany({
+      orderBy: {
+        TradeDay: "asc",
+      },
+    })
 
-    if (error) throw error
+    // Convert field names to lowercase for frontend consistency
+    const formattedTrades = trades.map((trade) => ({
+      contractName: trade.ContractName,
+      enteredAt: new Date(trade.EnteredAt),
+      exitedAt: new Date(trade.ExitedAt),
+      entryPrice: trade.EntryPrice,
+      exitPrice: trade.ExitPrice,
+      fees: trade.Fees,
+      pnl: trade.PnL,
+      size: trade.Size,
+      type: trade.Type,
+      tradeDay: new Date(trade.TradeDay),
+      tradeDuration: trade.TradeDuration
+    }))
 
-    return NextResponse.json(data)
+    return NextResponse.json(formattedTrades)
   } catch (error) {
     console.error("Error fetching trades:", error)
-    return NextResponse.json({ error: "Failed to fetch trades", details: error.message }, { status: 500 })
+    return NextResponse.json({ error: "Failed to fetch trades" }, { status: 500 })
   }
 }
 
 export async function POST(request: Request) {
   try {
     const data = await request.json()
-    const { data: trade, error } = await supabase
-      .from("trades")
-      .insert([
-        {
-          contractName: data.ContractName,
-          enteredAt: new Date(data.EnteredAt).toISOString(),
-          exitedAt: new Date(data.ExitedAt).toISOString(),
-          entryPrice: Number.parseFloat(data.EntryPrice),
-          exitPrice: Number.parseFloat(data.ExitPrice),
-          fees: Number.parseFloat(data.Fees),
-          pnl: Number.parseFloat(data.PnL),
-          size: data.Size,
-          type: data.Type,
-          tradeDay: new Date(data.TradeDay).toISOString(),
-          tradeDuration: data.TradeDuration,
-        },
-      ])
-      .select()
-
-    if (error) throw error
-
-    return NextResponse.json(trade[0])
+    const trade = await prisma.trade.create({
+      data: {
+        ContractName: data.contractName,
+        EnteredAt: new Date(data.enteredAt),
+        ExitedAt: new Date(data.exitedAt),
+        EntryPrice: data.entryPrice,
+        ExitPrice: data.exitPrice,
+        Fees: data.fees,
+        PnL: data.pnl,
+        Size: data.size,
+        Type: data.type,
+        TradeDay: new Date(data.tradeDay),
+        TradeDuration: data.tradeDuration
+      },
+    })
+    return NextResponse.json(trade)
   } catch (error) {
     console.error("Error creating trade:", error)
-    return NextResponse.json({ error: "Failed to create trade", details: error.message }, { status: 500 })
+    return NextResponse.json({ error: "Failed to create trade" }, { status: 500 })
   }
 }
 
 export async function DELETE() {
   try {
-    const { error } = await supabase.from("trades").delete().neq("id", 0) // This will delete all records
-
-    if (error) throw error
-
-    return NextResponse.json({ message: "All trades deleted successfully" })
+    await prisma.trade.deleteMany()
+    return NextResponse.json({ message: "All trades deleted" })
   } catch (error) {
-    console.error("Error deleting all trades:", error)
-    return NextResponse.json({ error: "Failed to delete all trades", details: error.message }, { status: 500 })
+    console.error("Error deleting trades:", error)
+    return NextResponse.json({ error: "Failed to delete trades" }, { status: 500 })
   }
 }
 

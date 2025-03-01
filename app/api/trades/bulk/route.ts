@@ -1,32 +1,60 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase"
+import prisma from "@/lib/prisma"
 
 export async function POST(request: Request) {
   try {
-    const trades = await request.json()
+    const body = await request.json()
+    // Handle both direct array and wrapped object formats
+    const tradesData = Array.isArray(body) ? body : body.trades || []
+    
+    if (!Array.isArray(tradesData) || tradesData.length === 0) {
+      return NextResponse.json(
+        { error: "Invalid input: expected non-empty array of trades" },
+        { status: 400 }
+      )
+    }
 
-    const formattedTrades = trades.map((trade: any) => ({
-      contractName: trade.contractName,
-      enteredAt: new Date(trade.EnteredAt).toISOString(),
-      exitedAt: new Date(trade.ExitedAt).toISOString(),
-      entryPrice: Number.parseFloat(trade.EntryPrice),
-      exitPrice: Number.parseFloat(trade.ExitPrice),
-      fees: Number.parseFloat(trade.Fees),
-      pnl: Number.parseFloat(trade.PnL),
-      size: trade.Size,
-      type: trade.Type,
-      tradeDay: new Date(trade.TradeDay).toISOString(),
-      tradeDuration: trade.TradeDuration,
+    const formattedTrades = tradesData.map((trade: any) => ({
+      ContractName: trade.contractName,
+      EnteredAt: new Date(trade.enteredAt),
+      ExitedAt: new Date(trade.exitedAt),
+      EntryPrice: trade.entryPrice,
+      ExitPrice: trade.exitPrice,
+      Fees: trade.fees,
+      PnL: trade.pnl,
+      Size: trade.size,
+      Type: trade.type,
+      TradeDay: new Date(trade.tradeDay),
+      TradeDuration: trade.tradeDuration
     }))
 
-    const { data, error } = await supabase.from("trades").insert(formattedTrades)
+    const result = await prisma.trade.createMany({
+      data: formattedTrades,
+      skipDuplicates: true
+    })
 
-    if (error) throw error
+    // Convert the response to lowercase field names
+    const formattedResult = {
+      ...result,
+      trades: formattedTrades.map(trade => ({
+        contractName: trade.ContractName,
+        enteredAt: trade.EnteredAt,
+        exitedAt: trade.ExitedAt,
+        entryPrice: trade.EntryPrice,
+        exitPrice: trade.ExitPrice,
+        fees: trade.Fees,
+        pnl: trade.PnL,
+        size: trade.Size,
+        type: trade.Type,
+        tradeDay: trade.TradeDay,
+        tradeDuration: trade.TradeDuration
+      }))
+    }
 
-    return NextResponse.json({ message: "Trades added successfully" })
+    return NextResponse.json(formattedResult)
   } catch (error) {
-    console.error("Error adding trades:", error)
-    return NextResponse.json({ error: "Failed to add trades", details: error.message }, { status: 500 })
+    console.error("Error creating trades:", error)
+    return NextResponse.json({ error: "Failed to create trades" }, { status: 500 })
   }
 }
 
