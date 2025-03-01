@@ -15,17 +15,17 @@ export async function POST(request: Request) {
     }
 
     const formattedTrades = tradesData.map((trade: any) => ({
-      ContractName: trade.contractName,
-      EnteredAt: new Date(trade.enteredAt),
-      ExitedAt: new Date(trade.exitedAt),
-      EntryPrice: trade.entryPrice,
-      ExitPrice: trade.exitPrice,
-      Fees: trade.fees,
-      PnL: trade.pnl,
-      Size: trade.size,
-      Type: trade.type,
-      TradeDay: new Date(trade.tradeDay),
-      TradeDuration: trade.tradeDuration
+      contractname: trade.contractName,
+      enteredat: new Date(trade.enteredAt),
+      exitedat: new Date(trade.exitedAt),
+      entryprice: trade.entryPrice,
+      exitprice: trade.exitPrice,
+      fees: trade.fees,
+      pnl: trade.pnl,
+      size: trade.size,
+      type: trade.type,
+      tradeday: new Date(trade.tradeDay),
+      tradeduration: trade.tradeDuration
     }))
 
     const result = await prisma.trade.createMany({
@@ -33,21 +33,21 @@ export async function POST(request: Request) {
       skipDuplicates: true
     })
 
-    // Convert the response to lowercase field names
+    // Convert back to camelCase for frontend
     const formattedResult = {
       ...result,
       trades: formattedTrades.map(trade => ({
-        contractName: trade.ContractName,
-        enteredAt: trade.EnteredAt,
-        exitedAt: trade.ExitedAt,
-        entryPrice: trade.EntryPrice,
-        exitPrice: trade.ExitPrice,
-        fees: trade.Fees,
-        pnl: trade.PnL,
-        size: trade.Size,
-        type: trade.Type,
-        tradeDay: trade.TradeDay,
-        tradeDuration: trade.TradeDuration
+        contractName: trade.contractname,
+        enteredAt: trade.enteredat,
+        exitedAt: trade.exitedat,
+        entryPrice: trade.entryprice,
+        exitPrice: trade.exitprice,
+        fees: trade.fees,
+        pnl: trade.pnl,
+        size: trade.size,
+        type: trade.type,
+        tradeDay: trade.tradeday,
+        tradeDuration: trade.tradeduration
       }))
     }
 

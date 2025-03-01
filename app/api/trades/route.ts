@@ -5,23 +5,23 @@ export async function GET() {
   try {
     const trades = await prisma.trade.findMany({
       orderBy: {
-        TradeDay: "asc",
+        tradeday: "asc",
       },
     })
 
-    // Convert field names to lowercase for frontend consistency
+    // Convert to camelCase for frontend
     const formattedTrades = trades.map((trade) => ({
-      contractName: trade.ContractName,
-      enteredAt: new Date(trade.EnteredAt),
-      exitedAt: new Date(trade.ExitedAt),
-      entryPrice: trade.EntryPrice,
-      exitPrice: trade.ExitPrice,
-      fees: trade.Fees,
-      pnl: trade.PnL,
-      size: trade.Size,
-      type: trade.Type,
-      tradeDay: new Date(trade.TradeDay),
-      tradeDuration: trade.TradeDuration
+      contractName: trade.contractname,
+      enteredAt: trade.enteredat,
+      exitedAt: trade.exitedat,
+      entryPrice: trade.entryprice,
+      exitPrice: trade.exitprice,
+      fees: trade.fees,
+      pnl: trade.pnl,
+      size: trade.size,
+      type: trade.type,
+      tradeDay: trade.tradeday,
+      tradeDuration: trade.tradeduration
     }))
 
     return NextResponse.json(formattedTrades)
@@ -36,20 +36,36 @@ export async function POST(request: Request) {
     const data = await request.json()
     const trade = await prisma.trade.create({
       data: {
-        ContractName: data.contractName,
-        EnteredAt: new Date(data.enteredAt),
-        ExitedAt: new Date(data.exitedAt),
-        EntryPrice: data.entryPrice,
-        ExitPrice: data.exitPrice,
-        Fees: data.fees,
-        PnL: data.pnl,
-        Size: data.size,
-        Type: data.type,
-        TradeDay: new Date(data.tradeDay),
-        TradeDuration: data.tradeDuration
+        contractname: data.contractName,
+        enteredat: new Date(data.enteredAt),
+        exitedat: new Date(data.exitedAt),
+        entryprice: data.entryPrice,
+        exitprice: data.exitPrice,
+        fees: data.fees,
+        pnl: data.pnl,
+        size: data.size,
+        type: data.type,
+        tradeday: new Date(data.tradeDay),
+        tradeduration: data.tradeDuration
       },
     })
-    return NextResponse.json(trade)
+
+    // Convert to camelCase for frontend
+    const formattedTrade = {
+      contractName: trade.contractname,
+      enteredAt: trade.enteredat,
+      exitedAt: trade.exitedat,
+      entryPrice: trade.entryprice,
+      exitPrice: trade.exitprice,
+      fees: trade.fees,
+      pnl: trade.pnl,
+      size: trade.size,
+      type: trade.type,
+      tradeDay: trade.tradeday,
+      tradeDuration: trade.tradeduration
+    }
+
+    return NextResponse.json(formattedTrade)
   } catch (error) {
     console.error("Error creating trade:", error)
     return NextResponse.json({ error: "Failed to create trade" }, { status: 500 })
